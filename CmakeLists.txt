@@ -8,6 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 enable_testing()
 
+find_package(MPI REQUIRED)
+find_package(OpenGL REQUIRED)
+
 add_subdirectory(simulation)
 add_subdirectory(visualization)
 
@@ -16,6 +19,7 @@ add_executable(heat_solver main.cpp)
 target_link_libraries(heat_solver
     PRIVATE simulation_module
     PRIVATE visualization_module
+    PRIVATE MPI::MPI_CXX     # <-- link MPI
 )
 
 # Include module headers
