@@ -1,3 +1,5 @@
+find_package(OpenGL REQUIRED)
+
 add_library(visualization_module
     src/Window.cpp
     src/ColorMap.cpp
@@ -8,9 +10,8 @@ target_include_directories(visualization_module
     PUBLIC include
 )
 
-find_package(OpenGL REQUIRED)
-
 target_link_libraries(visualization_module
     PUBLIC simulation_module
-    PRIVATE ${OPENGL_LIBRARIES} glfw3
+    PRIVATE ${OPENGL_LIBRARIES}
+    PRIVATE glfw3
 )

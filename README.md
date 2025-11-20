@@ -36,5 +36,6 @@ After building, the executable `heat_solver.exe` will be located in the build di
 
 From the build directory, run the program:
 ```bash
-./heat_solver.exe
+export PATH="/c/Program Files/Microsoft MPI/Bin:$PATH"
+mpiexec -n x ./heat_solver.exe (x is the number of processes)
 ```
