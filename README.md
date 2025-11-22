@@ -38,4 +38,8 @@ From the build directory, run the program:
 ```bash
 export PATH="/c/Program Files/Microsoft MPI/Bin:$PATH"
 mpiexec -n x ./heat_solver.exe (x is the number of processes)
+
+on linux
+
+mpiexec --oversubscribe -n 4 ./heat_solver
 ```
