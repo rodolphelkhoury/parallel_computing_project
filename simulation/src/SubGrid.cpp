@@ -71,5 +71,17 @@ SubGrid::SubGrid(const Grid& parentGrid, const SubGridInformation& subGridInfo)
 
 }
 
-
+void SubGrid::updatecelltemp() {
+    for(size_t i = 1; i <= m_cellCountX; ++i) {
+        for(size_t j = 1; j <= m_cellCountY; ++j) {
+            double center = m_currectTemprature[cellIndex(i, j)];
+            double north  = m_currectTemprature[cellIndex(i, j + 1)];
+            double south  = m_currectTemprature[cellIndex(i, j - 1)];
+            double east   = m_currectTemprature[cellIndex(i + 1, j)];
+            double west   = m_currectTemprature[cellIndex(i - 1, j)];
+            double cellNextValue=computeHeatUpdate(center, west, east,north, south,m_parentGrid.getThermalDiffusivity(),m_parentGrid.getTimeStep(),m_parentGrid.getCellSizeX());m_nextTemperature[cellIndex(i, j)] = cellNextValue;
+        }
+    }
+    m_currectTemprature.swap(m_nextTemperature);
+   
 } // namespace simulation
