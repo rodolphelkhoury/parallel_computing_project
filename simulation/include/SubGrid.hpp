@@ -11,7 +11,7 @@ namespace simulation {
 class SubGrid {
 public:
     SubGrid(const Grid& parentGrid, const SubGridInformation& subGridInfo);
-
+    void updateCellTemp();
 private:
     const Grid& m_parentGrid;
     const SubGridInformation& m_subGridInfo;
