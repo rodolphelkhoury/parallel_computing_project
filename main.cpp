@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
 
         if (worldRank == 0) {
             std::cout << "Grid created successfully: "
-                      << grid.getTotalGridX() << " x " << grid.getTotalGridY()
+                      << grid.getTotalGridCellsCountX() << " x " << grid.getTotalGridCellsCountY()
                       << "\n";
         }
     } catch (const std::exception& e) {

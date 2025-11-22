@@ -59,6 +59,22 @@ std::array<int, 2> SubGridInformation::getProcessGridDimensions() const {
     return m_processGridDimensions;
 }
 
+int SubGridInformation::getNumberOfProcessesOnX() const {
+    return m_processGridDimensions[0];
+}
+
+int SubGridInformation::getNumberOfProcessesOnY() const {
+    return m_processGridDimensions[1];
+}
+
+int SubGridInformation::getProcessCoordinatesX() const {
+    return m_processCoordinates[0];
+}
+
+int SubGridInformation::getProcessCoordinatesY() const {
+    return m_processCoordinates[1];
+}
+
 std::array<int, 2> SubGridInformation::getProcessCoordinates() const {
     return m_processCoordinates;
 }
@@ -77,6 +93,22 @@ int SubGridInformation::getEastNeighborRank() const {
 
 int SubGridInformation::getWestNeighborRank() const {
     return m_westNeighborRank;
+}
+
+bool SubGridInformation::hasNorthNeighbor() const {
+    return m_northNeighborRank != -1;
+}
+
+bool SubGridInformation::hasSouthNeighbor() const {
+    return m_southNeighborRank != -1;
+}
+
+bool SubGridInformation::hasEastNeighbor() const {
+    return m_eastNeighborRank != -1;
+}
+
+bool SubGridInformation::hasWestNeighbor() const {
+    return m_westNeighborRank != -1;
 }
 
 } // namespace simulation
