@@ -30,11 +30,6 @@ private:
     std::vector<double> m_currentTemperature;
     std::vector<double> m_nextTemperature;
 
-    std::vector<double> m_sendBufferLeft;
-    std::vector<double> m_sendBufferRight;
-    std::vector<double> m_recvBufferLeft;
-    std::vector<double> m_recvBufferRight;
-
     inline int cellIndex(int i, int j) const {
         return i * m_totalCellCountY + j;
     }

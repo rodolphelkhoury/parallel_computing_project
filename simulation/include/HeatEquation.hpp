@@ -3,20 +3,19 @@
 
 namespace simulation {
 
-    inline void computeHeatUpdate(
-        double &updatedValue,
-        double centerValue,
-        double leftValue,
-        double rightValue,
-        double topValue,
-        double bottomValue,
-        double thermalDiffusivity,
-        double timeStep,
-        double cellSizeX
-    ) {
-        const double laplacian = leftValue + rightValue + topValue + bottomValue - 4.0 * centerValue;
-        updatedValue = centerValue + (thermalDiffusivity * timeStep / (cellSizeX * cellSizeX)) * laplacian;
-    }
+inline [[nodiscard]] double computeHeatUpdate(
+    double centerValue,
+    double leftValue,
+    double rightValue,
+    double topValue,
+    double bottomValue,
+    double thermalDiffusivity,
+    double timeStep,
+    double cellSizeX
+) {
+    const double laplacian = leftValue + rightValue + topValue + bottomValue - 4.0 * centerValue;
+    return centerValue + (thermalDiffusivity * timeStep / (cellSizeX * cellSizeX)) * laplacian;
+}
 
 } // namespace simulation
 
