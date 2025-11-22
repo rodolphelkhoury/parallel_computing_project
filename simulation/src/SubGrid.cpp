@@ -74,7 +74,6 @@ SubGrid::SubGrid(const Grid& parentGrid, const SubGridInformation& subGridInfo)
 void SubGrid::updatecelltemp() {
     for(size_t i = 1; i <= m_cellCountX; ++i) {
         for(size_t j = 1; j <= m_cellCountY; ++j) {
-            // Example update logic (to be replaced with actual computation)
             double center = m_currectTemprature[cellIndex(i, j)];
             double north  = m_currectTemprature[cellIndex(i, j + 1)];
             double south  = m_currectTemprature[cellIndex(i, j - 1)];
