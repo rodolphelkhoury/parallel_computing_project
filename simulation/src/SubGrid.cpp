@@ -71,7 +71,7 @@ SubGrid::SubGrid(const Grid& parentGrid, const SubGridInformation& subGridInfo)
 
 }
 
-void SubGrid::updatecelltemp() {
+void SubGrid::updateCellTemp() {
     for(size_t i = 1; i <= m_cellCountX; ++i) {
         for(size_t j = 1; j <= m_cellCountY; ++j) {
             double center = m_currectTemprature[cellIndex(i, j)];
