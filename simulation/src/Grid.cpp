@@ -26,8 +26,8 @@ Grid::Grid(int totalX, int totalY,
         throw std::invalid_argument("Time step must be positive.");
 }
 
-int Grid::getTotalGridX() const { return m_totalGridX; }
-int Grid::getTotalGridY() const { return m_totalGridY; }
+int Grid::getTotalGridCellsCountX() const { return m_totalGridX; }
+int Grid::getTotalGridCellsCountY() const { return m_totalGridY; }
 double Grid::getCellSizeX() const { return m_cellSizeX; }
 double Grid::getCellSizeY() const { return m_cellSizeY; }
 double Grid::getTimeStep() const { return m_timeStep; }

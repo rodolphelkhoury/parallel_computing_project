@@ -33,11 +33,19 @@ public:
     [[nodiscard]] int getRank() const;
     [[nodiscard]] int getNumberOfProcesses() const;
     [[nodiscard]] std::array<int, 2> getProcessGridDimensions() const;
+    [[nodiscard]] int getNumberOfProcessesOnX() const;
+    [[nodiscard]] int getNumberOfProcessesOnY() const;
     [[nodiscard]] std::array<int, 2> getProcessCoordinates() const;
+    [[nodiscard]] int getProcessCoordinatesX() const;
+    [[nodiscard]] int getProcessCoordinatesY() const;
     [[nodiscard]] int getNorthNeighborRank() const;
     [[nodiscard]] int getSouthNeighborRank() const;
     [[nodiscard]] int getEastNeighborRank() const;
     [[nodiscard]] int getWestNeighborRank() const;
+    [[nodiscard]] bool hasNorthNeighbor() const;
+    [[nodiscard]] bool hasSouthNeighbor() const;
+    [[nodiscard]] bool hasEastNeighbor() const;
+    [[nodiscard]] bool hasWestNeighbor() const;
 };
 
 } // namespace simulation

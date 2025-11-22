@@ -50,8 +50,8 @@ public:
         EdgeType north, EdgeType south, EdgeType east, EdgeType west,
         double dirichlet);
 
-    [[nodiscard]] int getTotalGridX() const;
-    [[nodiscard]] int getTotalGridY() const;
+    [[nodiscard]] int getTotalGridCellsCountX() const;
+    [[nodiscard]] int getTotalGridCellsCountY() const;
     [[nodiscard]] double getCellSizeX() const;
     [[nodiscard]] double getCellSizeY() const;
     [[nodiscard]] double getTimeStep() const;
