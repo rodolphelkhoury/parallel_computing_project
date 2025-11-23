@@ -96,19 +96,20 @@ int SubGridInformation::getWestNeighborRank() const {
 }
 
 bool SubGridInformation::hasNorthNeighbor() const {
-    return m_northNeighborRank != -1;
+    return m_northNeighborRank != MPI_PROC_NULL;
 }
 
 bool SubGridInformation::hasSouthNeighbor() const {
-    return m_southNeighborRank != -1;
+    return m_southNeighborRank != MPI_PROC_NULL;
 }
 
 bool SubGridInformation::hasEastNeighbor() const {
-    return m_eastNeighborRank != -1;
+    return m_eastNeighborRank != MPI_PROC_NULL;
 }
 
 bool SubGridInformation::hasWestNeighbor() const {
-    return m_westNeighborRank != -1;
+    return m_westNeighborRank != MPI_PROC_NULL;
 }
+
 
 } // namespace simulation
