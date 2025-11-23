@@ -22,7 +22,6 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 
     try {
-        // Grid parameters
         int totalX = 129;
         int totalY = 129;
 
@@ -33,12 +32,11 @@ int main(int argc, char** argv) {
         double dy = lengthY / (totalY - 1);
 
         double alpha = 1.0;
-        double dt = 0.2 * dx * dy / alpha; // time step
+        double dt = 0.2 * dx * dy / alpha;
         int iterations = static_cast<int>(200 / dt);
 
         double dirichletValue = 100.0;
 
-        // Create the grid
         simulation::Grid grid(
             totalX, totalY,
             dx, dy,
@@ -46,8 +44,8 @@ int main(int argc, char** argv) {
             alpha,
             iterations,
             simulation::EdgeType::DIRICHLET, // North
-            simulation::EdgeType::DIRICHLET,   // South
-            simulation::EdgeType::NEUMANN, // East
+            simulation::EdgeType::DIRICHLET, // South
+            simulation::EdgeType::NEUMANN,   // East
             simulation::EdgeType::NEUMANN,   // West
             dirichletValue
         );
@@ -58,11 +56,9 @@ int main(int argc, char** argv) {
                       << grid.getTotalGridCellsCountY() << "\n";
         }
 
-        // Subgrid setup
         simulation::SubGridInformation subGridInfo(MPI_COMM_WORLD, totalX, totalY);
         simulation::SubGrid subGrid(grid, subGridInfo);
 
-        // Visualization setup (only on master process)
         visualization::Window* window = nullptr;
         visualization::GridRenderer* renderer = nullptr;
         if (worldRank == 0) {
@@ -70,18 +66,12 @@ int main(int argc, char** argv) {
             renderer = new visualization::GridRenderer(*window);
         }
 
-        // Main simulation loop - CORRECTED ORDER
         for (int iter = 0; iter < grid.getTotalIterations(); ++iter) {
             subGrid.exchangeGhostCells();
             subGrid.applyBoundaryConditions();
             subGrid.updateCellTemp();
 
-            // Visualization every 10 iterations
-            if (iter % 10 == 0 && worldRank == 0) {
-                // Gather full grid on master
-                std::vector<double> globalGrid(totalX * totalY, 0.0);
-
-                // Copy local master data
+            if (iter % 10 == 0) {
                 auto localInterior = subGrid.getInteriorCells();
                 int procCountX = subGridInfo.getNumberOfProcessesOnX();
                 int procCountY = subGridInfo.getNumberOfProcessesOnY();
@@ -96,71 +86,60 @@ int main(int argc, char** argv) {
                 int leftoverY = totalY % procCountY;
                 int startY = procCoordY * baseY + std::min(procCoordY, leftoverY);
 
-                for (int i = 0; i < subGrid.getCellCountX(); ++i) {
-                    for (int j = 0; j < subGrid.getCellCountY(); ++j) {
-                        int localIdx = i * subGrid.getCellCountY() + j;
-                        int globalIdx = (startX + i) * totalY + (startY + j);
-                        globalGrid[globalIdx] = localInterior[localIdx];
-                    }
-                }
+                if (worldRank == 0) {
+                    std::vector<double> globalGrid(totalX * totalY, 0.0);
 
-                // Receive from other processes
-                for (int rank = 1; rank < worldSize; ++rank) {
-                    int remoteCellsX, remoteCellsY, remoteStartX, remoteStartY;
-                    MPI_Recv(&remoteCellsX, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Recv(&remoteCellsY, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Recv(&remoteStartX, 1, MPI_INT, rank, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Recv(&remoteStartY, 1, MPI_INT, rank, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-                    std::vector<double> remoteData(remoteCellsX * remoteCellsY);
-                    MPI_Recv(remoteData.data(), remoteCellsX * remoteCellsY, MPI_DOUBLE, rank, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-                    for (int i = 0; i < remoteCellsX; ++i) {
-                        for (int j = 0; j < remoteCellsY; ++j) {
-                            int remoteIdx = i * remoteCellsY + j;
-                            int globalIdx = (remoteStartX + i) * totalY + (remoteStartY + j);
-                            globalGrid[globalIdx] = remoteData[remoteIdx];
+                    // Copy master local data
+                    for (int i = 0; i < subGrid.getCellCountX(); ++i) {
+                        for (int j = 0; j < subGrid.getCellCountY(); ++j) {
+                            int localIdx = i * subGrid.getCellCountY() + j;
+                            int globalIdx = (startY + j) * totalX + (startX + i);
+                            globalGrid[globalIdx] = localInterior[localIdx];
                         }
                     }
+
+                    // Receive from other processes
+                    for (int rank = 1; rank < worldSize; ++rank) {
+                        int remoteCellsX, remoteCellsY, remoteStartX, remoteStartY;
+                        MPI_Recv(&remoteCellsX, 1, MPI_INT, rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        MPI_Recv(&remoteCellsY, 1, MPI_INT, rank, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        MPI_Recv(&remoteStartX, 1, MPI_INT, rank, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                        MPI_Recv(&remoteStartY, 1, MPI_INT, rank, 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                        std::vector<double> remoteData(remoteCellsX * remoteCellsY);
+                        MPI_Recv(remoteData.data(), remoteCellsX * remoteCellsY, MPI_DOUBLE, rank, 4, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                        for (int i = 0; i < remoteCellsX; ++i) {
+                            for (int j = 0; j < remoteCellsY; ++j) {
+                                int remoteIdx = i * remoteCellsY + j;
+                                int globalIdx = (remoteStartY + j) * totalX + (remoteStartX + i);
+                                globalGrid[globalIdx] = remoteData[remoteIdx];
+                            }
+                        }
+                    }
+
+                    double minTemp = 0.0;
+                    double maxTemp = dirichletValue;
+                    renderer->render(globalGrid, totalX, totalY, minTemp, maxTemp);
+
+                    if (glfwWindowShouldClose(window->get())) {
+                        break;
+                    }
+
+                } else {
+                    // Send local data to master
+                    int cellsX = subGrid.getCellCountX();
+                    int cellsY = subGrid.getCellCountY();
+
+                    MPI_Send(&cellsX, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+                    MPI_Send(&cellsY, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+                    MPI_Send(&startX, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
+                    MPI_Send(&startY, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
+                    MPI_Send(localInterior.data(), cellsX * cellsY, MPI_DOUBLE, 0, 4, MPI_COMM_WORLD);
                 }
-
-                // Render
-                double minTemp = 0.0;
-                double maxTemp = dirichletValue;
-                renderer->render(globalGrid, totalX, totalY, minTemp, maxTemp);
-
-                if (glfwWindowShouldClose(window->get())) {
-                    break;
-                }
-            } 
-            else if (worldRank != 0 && iter % 10 == 0) {
-                // Send local data to master
-                auto localInterior = subGrid.getInteriorCells();
-                int procCountX = subGridInfo.getNumberOfProcessesOnX();
-                int procCountY = subGridInfo.getNumberOfProcessesOnY();
-                int procCoordX = subGridInfo.getProcessCoordinatesX();
-                int procCoordY = subGridInfo.getProcessCoordinatesY();
-
-                int baseX = totalX / procCountX;
-                int leftoverX = totalX % procCountX;
-                int startX = procCoordX * baseX + std::min(procCoordX, leftoverX);
-
-                int baseY = totalY / procCountY;
-                int leftoverY = totalY % procCountY;
-                int startY = procCoordY * baseY + std::min(procCoordY, leftoverY);
-
-                int cellsX = subGrid.getCellCountX();
-                int cellsY = subGrid.getCellCountY();
-
-                MPI_Send(&cellsX, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
-                MPI_Send(&cellsY, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
-                MPI_Send(&startX, 1, MPI_INT, 0, 2, MPI_COMM_WORLD);
-                MPI_Send(&startY, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
-                MPI_Send(localInterior.data(), cellsX * cellsY, MPI_DOUBLE, 0, 4, MPI_COMM_WORLD);
             }
         }
 
-        // Cleanup
         if (worldRank == 0) {
             delete renderer;
             delete window;

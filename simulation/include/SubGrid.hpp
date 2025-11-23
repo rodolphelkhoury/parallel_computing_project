@@ -8,6 +8,12 @@
 
 namespace simulation {
 
+/**
+ * @brief Represents a local portion (sub-grid) of the global simulation grid
+ * owned by a single MPI process. Manages interior and ghost cells,
+ * updates temperatures, performs halo exchanges, and applies boundary
+ * conditions for the local subdomain.
+ */
 class SubGrid {
 public:
     SubGrid(const Grid& parentGrid, const SubGridInformation& subGridInfo);

@@ -6,7 +6,7 @@ namespace visualization {
 
 Color temperatureToColor(double temp, double minValue, double maxValue) {
     double t = (temp - minValue) / (maxValue - minValue);
-    t = std::clamp(t, 0.0, 1.0);
+    t = std::clamp(t, 0.0, 1.0); // keep value between 0 and 1
 
     return Color{
         static_cast<float>(t),         // red increases with temperature
