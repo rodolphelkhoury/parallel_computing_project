@@ -72,13 +72,8 @@ int main(int argc, char** argv) {
 
         // Main simulation loop - CORRECTED ORDER
         for (int iter = 0; iter < grid.getTotalIterations(); ++iter) {
-            // 1. Exchange ghost cells with neighbors
             subGrid.exchangeGhostCells();
-            
-            // 2. Apply boundary conditions (Dirichlet/Neumann on physical edges)
             subGrid.applyBoundaryConditions();
-            
-            // 3. Update interior cells using the heat equation
             subGrid.updateCellTemp();
 
             // Visualization every 10 iterations

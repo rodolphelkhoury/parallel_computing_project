@@ -38,61 +38,14 @@ SubGrid::SubGrid(const Grid& parentGrid, const SubGridInformation& info)
 
     m_currentTemperature.assign(m_totalCellCountX * m_totalCellCountY, 0.0);
     m_nextTemperature.assign(m_totalCellCountX * m_totalCellCountY, 0.0);
-
-    const bool onWestGlobal  = (processCoordinatesSuivantX == 0);
-    const bool onEastGlobal  = (processCoordinatesSuivantX == numberOfProcessesSuivantX - 1);
-    const bool onSouthGlobal = (processCoordiantesSuivantY == 0);
-    const bool onNorthGlobal = (processCoordiantesSuivantY == numberOfProcessesSuivantY - 1);
-
-    const bool westDirichlet  = parentGrid.getEdgeWest()  == EdgeType::DIRICHLET;
-    const bool eastDirichlet  = parentGrid.getEdgeEast()  == EdgeType::DIRICHLET;
-    const bool northDirichlet = parentGrid.getEdgeNorth() == EdgeType::DIRICHLET;
-    const bool southDirichlet = parentGrid.getEdgeSouth() == EdgeType::DIRICHLET;
-
-    const double dirichletValue = parentGrid.getDirichletValue();
-
-    const int iStart = 1; // interior cells
-    const int jStart = 1;
-    const int iEnd = m_cellCountX;
-    const int jEnd = m_cellCountY;
-
-    if (onWestGlobal && westDirichlet) {
-        int i = iStart;
-        for (int j = jStart; j <= jEnd; ++j) {
-            m_currentTemperature[cellIndex(i, j)] = dirichletValue;
-        }
-    }
-
-    if (onEastGlobal && eastDirichlet) {
-        int i = iEnd;
-        for (int j = jStart; j <= jEnd; ++j) {
-            m_currentTemperature[cellIndex(i, j)] = dirichletValue;
-        }
-    }
-
-    if (onSouthGlobal && southDirichlet) {
-        int j = jStart;
-        for (int i = iStart; i <= iEnd; ++i) {
-            m_currentTemperature[cellIndex(i, j)] = dirichletValue;
-        }
-    }
-
-    if (onNorthGlobal && northDirichlet) {
-        int j = jEnd;
-        for (int i = iStart; i <= iEnd; ++i) {
-            m_currentTemperature[cellIndex(i, j)] = dirichletValue;
-        }
-    }
 }
 
 void SubGrid::exchangeGhostCells() {
     std::vector<MPI_Request> requests;
 
-    // Interior starts at index 1
     int startI = 1;
     int startJ = 1;
 
-    // Prepare send/receive buffers
     std::vector<double> sendColWest(m_cellCountY), recvColWest(m_cellCountY);
     std::vector<double> sendColEast(m_cellCountY), recvColEast(m_cellCountY);
     std::vector<double> sendRowSouth(m_cellCountX), recvRowSouth(m_cellCountX);
@@ -169,73 +122,6 @@ void SubGrid::exchangeGhostCells() {
     }
 }
 
-void SubGrid::applyBoundaryConditions() {
-    int processCoordinateX = m_subGridInfo.getProcessCoordinatesX();
-    int processCoordinateY = m_subGridInfo.getProcessCoordinatesY();
-
-    int procCountX = m_subGridInfo.getNumberOfProcessesOnX();
-    int procCountY = m_subGridInfo.getNumberOfProcessesOnY();
-
-    // Interior always starts at index 1
-    int startI = 1;
-    int startJ = 1;
-
-    // North boundary (top of domain)
-    if (processCoordinateY == procCountY - 1) {
-        int j = startJ + m_cellCountY - 1;  // Last interior row in storage
-        for (int i = 0; i < m_cellCountX; ++i) {
-            int storageI = startI + i;
-            if (m_parentGrid.getEdgeNorth() == EdgeType::DIRICHLET) {
-                m_currentTemperature[cellIndex(storageI, j)] = m_parentGrid.getDirichletValue();
-            } else { // NEUMANN: coprocessCoordiantesSuivantY to ghost
-                m_currentTemperature[cellIndex(storageI, m_totalCellCountY - 1)] = 
-                    m_currentTemperature[cellIndex(storageI, j)];
-            }
-        }
-    }
-
-    // South boundary (bottom of domain)
-    if (processCoordinateY == 0) {
-        int j = startJ;  // First interior row in storage
-        for (int i = 0; i < m_cellCountX; ++i) {
-            int storageI = startI + i;
-            if (m_parentGrid.getEdgeSouth() == EdgeType::DIRICHLET) {
-                m_currentTemperature[cellIndex(storageI, j)] = m_parentGrid.getDirichletValue();
-            } else { // NEUMANN: coprocessCoordiantesSuivantY to ghost
-                m_currentTemperature[cellIndex(storageI, 0)] = 
-                    m_currentTemperature[cellIndex(storageI, j)];
-            }
-        }
-    }
-
-    // West boundary (left of domain)
-    if (processCoordinateX == 0) {
-        int i = startI;  // First interior column in storage
-        for (int j = 0; j < m_cellCountY; ++j) {
-            int storageJ = startJ + j;
-            if (m_parentGrid.getEdgeWest() == EdgeType::DIRICHLET) {
-                m_currentTemperature[cellIndex(i, storageJ)] = m_parentGrid.getDirichletValue();
-            } else { // NEUMANN: coprocessCoordiantesSuivantY to ghost
-                m_currentTemperature[cellIndex(0, storageJ)] = 
-                    m_currentTemperature[cellIndex(i, storageJ)];
-            }
-        }
-    }
-
-    // East boundary (right of domain)
-    if (processCoordinateX == procCountX - 1) {
-        int i = startI + m_cellCountX - 1;  // Last interior column in storage
-        for (int j = 0; j < m_cellCountY; ++j) {
-            int storageJ = startJ + j;
-            if (m_parentGrid.getEdgeEast() == EdgeType::DIRICHLET) {
-                m_currentTemperature[cellIndex(i, storageJ)] = m_parentGrid.getDirichletValue();
-            } else { // NEUMANN: coprocessCoordiantesSuivantY to ghost
-                m_currentTemperature[cellIndex(m_totalCellCountX - 1, storageJ)] = 
-                    m_currentTemperature[cellIndex(i, storageJ)];
-            }
-        }
-    }
-}
 
 void SubGrid::updateCellTemp() {
     const double diffusivity = m_parentGrid.getThermalDiffusivity();
@@ -261,6 +147,59 @@ void SubGrid::updateCellTemp() {
     m_currentTemperature.swap(m_nextTemperature);
 }
 
+void SubGrid::applyBoundaryConditions() {
+    const int procX = m_subGridInfo.getProcessCoordinatesX();
+    const int procY = m_subGridInfo.getProcessCoordinatesY();
+    const int procCountX = m_subGridInfo.getNumberOfProcessesOnX();
+    const int procCountY = m_subGridInfo.getNumberOfProcessesOnY();
+
+    auto& temp = m_currentTemperature;
+    const double dirichletValue = m_parentGrid.getDirichletValue();
+
+    if (procY == procCountY - 1) {
+        int j = 1 + m_cellCountY - 1;
+        for (int i = 1; i <= m_cellCountX; ++i) {
+            if (m_parentGrid.getEdgeNorth() == EdgeType::DIRICHLET) {
+                temp[cellIndex(i, j)] = dirichletValue;
+            } else {
+                temp[cellIndex(i, m_totalCellCountY - 1)] = temp[cellIndex(i, j)];
+            }
+        }
+    }
+
+    if (procY == 0) {
+        int j = 1;
+        for (int i = 1; i <= m_cellCountX; ++i) {
+            if (m_parentGrid.getEdgeSouth() == EdgeType::DIRICHLET) {
+                temp[cellIndex(i, j)] = dirichletValue;
+            } else {
+                temp[cellIndex(i, 0)] = temp[cellIndex(i, j)];
+            }
+        }
+    }
+
+    if (procX == 0) {
+        int i = 1;
+        for (int j = 1; j <= m_cellCountY; ++j) {
+            if (m_parentGrid.getEdgeWest() == EdgeType::DIRICHLET) {
+                temp[cellIndex(i, j)] = dirichletValue;
+            } else {
+                temp[cellIndex(0, j)] = temp[cellIndex(i, j)];
+            }
+        }
+    }
+
+    if (procX == procCountX - 1) {
+        int i = 1 + m_cellCountX - 1;
+        for (int j = 1; j <= m_cellCountY; ++j) {
+            if (m_parentGrid.getEdgeEast() == EdgeType::DIRICHLET) {
+                temp[cellIndex(i, j)] = dirichletValue;
+            } else {
+                temp[cellIndex(m_totalCellCountX - 1, j)] = temp[cellIndex(i, j)];
+            }
+        }
+    }
+}
 
 const std::vector<double>& SubGrid::getCurrentTemperature() const {
     return m_currentTemperature;
@@ -272,17 +211,15 @@ int SubGrid::getTotalCellCountX() const { return m_totalCellCountX; }
 int SubGrid::getTotalCellCountY() const { return m_totalCellCountY; }
 
 std::vector<double> SubGrid::getInteriorCells() const {
-    // Interior always starts at index 1
-    int startI = 1;
-    int startJ = 1;
+    std::vector<double> interior;
+    interior.reserve(m_cellCountX * m_cellCountY);
 
-    std::vector<double> interior(m_cellCountX * m_cellCountY);
-    for (int i = 0; i < m_cellCountX; ++i) {
-        for (int j = 0; j < m_cellCountY; ++j) {
-            int localIdx = i * m_cellCountY + j;
-            interior[localIdx] = m_currentTemperature[cellIndex(startI + i, startJ + j)];
+    for (int i = 1; i <= m_cellCountX; ++i) {
+        for (int j = 1; j <= m_cellCountY; ++j) {
+            interior.push_back(m_currentTemperature[cellIndex(i, j)]);
         }
     }
+
     return interior;
 }
 
