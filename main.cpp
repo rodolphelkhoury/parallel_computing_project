@@ -50,12 +50,6 @@ int main(int argc, char** argv) {
             dirichletValue
         );
 
-        if (worldRank == 0) {
-            std::cout << "Grid created successfully: "
-                      << grid.getTotalGridCellsCountX() << " x "
-                      << grid.getTotalGridCellsCountY() << "\n";
-        }
-
         simulation::SubGridInformation subGridInfo(MPI_COMM_WORLD, totalX, totalY);
         simulation::SubGrid subGrid(grid, subGridInfo);
 
