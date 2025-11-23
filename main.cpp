@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
             iterations,
             simulation::EdgeType::DIRICHLET, // North
             simulation::EdgeType::NEUMANN,   // South
-            simulation::EdgeType::DIRICHLET, // East
-            simulation::EdgeType::NEUMANN,   // West
+            simulation::EdgeType::NEUMANN, // East
+            simulation::EdgeType::DIRICHLET,   // West
             dirichletValue
         );
 
@@ -70,9 +70,15 @@ int main(int argc, char** argv) {
             renderer = new visualization::GridRenderer(*window);
         }
 
-        // Main simulation loop
+        // Main simulation loop - CORRECTED ORDER
         for (int iter = 0; iter < grid.getTotalIterations(); ++iter) {
+            // 1. Exchange ghost cells with neighbors
             subGrid.exchangeGhostCells();
+            
+            // 2. Apply boundary conditions (Dirichlet/Neumann on physical edges)
+            subGrid.applyBoundaryConditions();
+            
+            // 3. Update interior cells using the heat equation
             subGrid.updateCellTemp();
 
             // Visualization every 10 iterations
@@ -132,7 +138,7 @@ int main(int argc, char** argv) {
                     break;
                 }
             } 
-            else if (worldRank != 0) {
+            else if (worldRank != 0 && iter % 10 == 0) {
                 // Send local data to master
                 auto localInterior = subGrid.getInteriorCells();
                 int procCountX = subGridInfo.getNumberOfProcessesOnX();
