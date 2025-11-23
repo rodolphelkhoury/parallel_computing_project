@@ -46,9 +46,9 @@ int main(int argc, char** argv) {
             alpha,
             iterations,
             simulation::EdgeType::DIRICHLET, // North
-            simulation::EdgeType::NEUMANN,   // South
+            simulation::EdgeType::DIRICHLET,   // South
             simulation::EdgeType::NEUMANN, // East
-            simulation::EdgeType::DIRICHLET,   // West
+            simulation::EdgeType::NEUMANN,   // West
             dirichletValue
         );
 

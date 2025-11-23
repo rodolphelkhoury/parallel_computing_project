@@ -108,7 +108,6 @@ void SubGrid::exchangeGhostCells() {
         sendRowNorth[i] = m_currentTemperature[cellIndex(startI + i, startJ + m_cellCountY - 1)];
     }
 
-    // West neighbor exchange
     if (m_subGridInfo.hasWestNeighbor()) {
         MPI_Request reqSend, reqRecv;
         MPI_Irecv(recvColWest.data(), m_cellCountY, MPI_DOUBLE, m_subGridInfo.getWestNeighborRank(), 1, m_subGridInfo.getCommunicator(), &reqRecv);
@@ -117,7 +116,6 @@ void SubGrid::exchangeGhostCells() {
         requests.push_back(reqSend);
     }
 
-    // East neighbor exchange
     if (m_subGridInfo.hasEastNeighbor()) {
         MPI_Request reqSend, reqRecv;
         MPI_Irecv(recvColEast.data(), m_cellCountY, MPI_DOUBLE, m_subGridInfo.getEastNeighborRank(), 0, m_subGridInfo.getCommunicator(), &reqRecv);
@@ -126,7 +124,6 @@ void SubGrid::exchangeGhostCells() {
         requests.push_back(reqSend);
     }
 
-    // South neighbor exchange
     if (m_subGridInfo.hasSouthNeighbor()) {
         MPI_Request reqSend, reqRecv;
         MPI_Irecv(recvRowSouth.data(), m_cellCountX, MPI_DOUBLE, m_subGridInfo.getSouthNeighborRank(), 2, m_subGridInfo.getCommunicator(), &reqRecv);
@@ -135,7 +132,6 @@ void SubGrid::exchangeGhostCells() {
         requests.push_back(reqSend);
     }
 
-    // North neighbor exchange
     if (m_subGridInfo.hasNorthNeighbor()) {
         MPI_Request reqSend, reqRecv;
         MPI_Irecv(recvRowNorth.data(), m_cellCountX, MPI_DOUBLE, m_subGridInfo.getNorthNeighborRank(), 3, m_subGridInfo.getCommunicator(), &reqRecv);
@@ -242,37 +238,29 @@ void SubGrid::applyBoundaryConditions() {
 }
 
 void SubGrid::updateCellTemp() {
-    // Interior always starts at index 1
-    int startI = 1;
-    int startJ = 1;
+    const double diffusivity = m_parentGrid.getThermalDiffusivity();
+    const double dt = m_parentGrid.getTimeStep();
+    const double dx = m_parentGrid.getCellSizeX();
 
-    // Update all interior cells using the heat equation
-    // At this point, ghost cells have been filled by exchangeGhostCells() and applyBoundaryConditions()
-    for (int i = 0; i < m_cellCountX; ++i) {
-        for (int j = 0; j < m_cellCountY; ++j) {
-            int storageI = startI + i;
-            int storageJ = startJ + j;
+    for (int i = 1; i <= m_cellCountX; ++i) {
+        for (int j = 1; j <= m_cellCountY; ++j) {
 
-            double center = m_currentTemperature[cellIndex(storageI, storageJ)];
-            double west   = m_currentTemperature[cellIndex(storageI - 1, storageJ)];
-            double east   = m_currentTemperature[cellIndex(storageI + 1, storageJ)];
-            double south  = m_currentTemperature[cellIndex(storageI, storageJ - 1)];
-            double north  = m_currentTemperature[cellIndex(storageI, storageJ + 1)];
+            const double center = m_currentTemperature[cellIndex(i, j)];
+            const double west = m_currentTemperature[cellIndex(i - 1, j)];
+            const double east = m_currentTemperature[cellIndex(i + 1, j)];
+            const double south = m_currentTemperature[cellIndex(i, j - 1)];
+            const double north = m_currentTemperature[cellIndex(i, j + 1)];
 
-            double updated = computeHeatUpdate(
+            m_nextTemperature[cellIndex(i, j)] = computeHeatUpdate(
                 center, west, east, north, south,
-                m_parentGrid.getThermalDiffusivity(),
-                m_parentGrid.getTimeStep(),
-                m_parentGrid.getCellSizeX()
+                diffusivity, dt, dx
             );
-
-            m_nextTemperature[cellIndex(storageI, storageJ)] = updated;
         }
     }
 
-    // Swap buffers
     m_currentTemperature.swap(m_nextTemperature);
 }
+
 
 const std::vector<double>& SubGrid::getCurrentTemperature() const {
     return m_currentTemperature;
