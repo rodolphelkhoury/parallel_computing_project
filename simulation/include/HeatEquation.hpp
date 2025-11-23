@@ -3,7 +3,7 @@
 
 namespace simulation {
 
-inline [[nodiscard]] double computeHeatUpdate(
+[[nodiscard]] inline double computeHeatUpdate(
     double centerValue,
     double leftValue,
     double rightValue,
