@@ -2,6 +2,10 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <sstream>
+#include <iomanip>
+#include <ctime>
+#include <string>
 
 #include <mpi.h>
 
@@ -20,6 +24,29 @@ int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+
+    // lightweight timestamped logging helpers
+
+    auto current_time_str = []() -> std::string {
+        using namespace std::chrono;
+        auto now = system_clock::now();
+        auto t = system_clock::to_time_t(now);
+        std::tm tm;
+        localtime_r(&t, &tm);
+        std::ostringstream oss;
+        oss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+        return oss.str();
+    };
+
+    auto log_info = [&](int rank, const std::string& msg) {
+        std::cout << "[" << current_time_str() << "] [Rank " << rank << "] INFO: " << msg << std::endl;
+    };
+
+    auto log_error = [&](int rank, const std::string& msg) {
+        std::cerr << "[" << current_time_str() << "] [Rank " << rank << "] ERROR: " << msg << std::endl;
+    };
+
+    log_info(worldRank, std::string("MPI initialized; world size = ") + std::to_string(worldSize));
 
     try {
         int totalX = 129;
@@ -53,19 +80,29 @@ int main(int argc, char** argv) {
         simulation::SubGridInformation subGridInfo(MPI_COMM_WORLD, totalX, totalY);
         simulation::SubGrid subGrid(grid, subGridInfo);
 
+        log_info(worldRank, std::string("Created grid ") + std::to_string(totalX) + "x" + std::to_string(totalY));
+        log_info(worldRank, std::string("Subgrid cells: ") + std::to_string(subGrid.getCellCountX()) + "x" + std::to_string(subGrid.getCellCountY()));
+
         visualization::Window* window = nullptr;
         visualization::GridRenderer* renderer = nullptr;
         if (worldRank == 0) {
             window = new visualization::Window(800, 800, "Heat Simulation");
             renderer = new visualization::GridRenderer(*window);
+            log_info(0, "Created window and renderer");
         }
 
+        log_info(worldRank, std::string("Starting iterations: ") + std::to_string(grid.getTotalIterations()));
+
         for (int iter = 0; iter < grid.getTotalIterations(); ++iter) {
+            if (iter % 50 == 0) {
+                log_info(worldRank, std::string("Iteration ") + std::to_string(iter));
+            }
             subGrid.exchangeGhostCells();
             subGrid.applyBoundaryConditions();
             subGrid.updateCellTemp();
 
             if (iter % 10 == 0) {
+                log_info(worldRank, std::string("Iteration ") + std::to_string(iter) + ": preparing to exchange/collect data");
                 auto localInterior = subGrid.getInteriorCells();
                 int procCountX = subGridInfo.getNumberOfProcessesOnX();
                 int procCountY = subGridInfo.getNumberOfProcessesOnY();
@@ -81,6 +118,7 @@ int main(int argc, char** argv) {
                 int startY = procCoordY * baseY + std::min(procCoordY, leftoverY);
 
                 if (worldRank == 0) {
+                    log_info(0, std::string("Master assembling global grid for iter ") + std::to_string(iter));
                     std::vector<double> globalGrid(totalX * totalY, 0.0);
 
                     // Copy master local data
@@ -114,6 +152,7 @@ int main(int argc, char** argv) {
 
                     double minTemp = 0.0;
                     double maxTemp = dirichletValue;
+                    log_info(0, std::string("Rendering iteration ") + std::to_string(iter));
                     renderer->render(globalGrid, totalX, totalY, minTemp, maxTemp);
 
                     if (glfwWindowShouldClose(window->get())) {
@@ -121,6 +160,7 @@ int main(int argc, char** argv) {
                     }
 
                 } else {
+                    log_info(worldRank, std::string("Sending local data to master at iter ") + std::to_string(iter));
                     // Send local data to master
                     int cellsX = subGrid.getCellCountX();
                     int cellsY = subGrid.getCellCountY();
@@ -135,14 +175,16 @@ int main(int argc, char** argv) {
         }
 
         if (worldRank == 0) {
+            log_info(0, "Shutting down visualization");
             delete renderer;
             delete window;
         }
 
     } catch (const std::exception& e) {
-        std::cerr << "[Rank " << worldRank << "] Error: " << e.what() << "\n";
+        log_error(worldRank, std::string("Exception caught: ") + e.what());
     }
 
+    log_info(worldRank, "Finalizing MPI");
     MPI_Finalize();
     return 0;
 }
