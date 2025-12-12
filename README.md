@@ -13,7 +13,7 @@ The formulation follows *Numerical Methods for Engineers* by Chapra & Canale.
 
 The mathematical model comes from Chapter 30.1 — Heat-Conduction Equation, where the authors derive the PDE governing heat diffusion in a plate.
 
-![Heat Conduction Equation](images/equation_1.png)
+![Heat Conduction PDE](images/heat_conduction_pde.png)
 
 ## 2. PDE Classification — Why It Is Parabolic
 
@@ -35,6 +35,8 @@ A parabolic PDE contains:
 
 The heat equation has exactly this structure.
 
+![PDE Classification](images/pde_classification.png)
+
 **Example**
 
 A plate heated along one edge warms gradually over time — a typical parabolic diffusion behavior.
@@ -46,6 +48,8 @@ The explicit method is described in Chapter 30.2 — Explicit Methods.
 ### 3.1 Time Approximation (Forward Euler)
 
 Uses a forward difference for the time derivative.
+
+![Forward Euler Method](images/forward_euler.png)
 
 ### 3.2 Space Approximation (Central Differences)
 
