@@ -13,6 +13,8 @@ The formulation follows *Numerical Methods for Engineers* by Chapra & Canale.
 
 The mathematical model comes from Chapter 30.1 — Heat-Conduction Equation, where the authors derive the PDE governing heat diffusion in a plate.
 
+![Heat Conduction Equation](images/equation_1.png)
+
 ## 2. PDE Classification — Why It Is Parabolic
 
 In PT8.1 Motivation (Table PT8.1), PDEs are classified as:
