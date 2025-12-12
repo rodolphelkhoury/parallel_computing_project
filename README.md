@@ -53,11 +53,19 @@ Uses a forward difference for the time derivative.
 
 ### 3.2 Space Approximation (Central Differences)
 
+![Central Differences](images/central_differences.png)
+
 Uses central differences for the second spatial derivatives.
 
 ### 3.3 Combined Explicit FTCS Update
 
 From Equation (30.2), we derive the update used in the code:
+
+![FTCS Update Equation](images/ftcs_update_equation.png)
+
+with:
+
+![Stability Coefficient](images/stability_coefficient.png)
 
 ```cpp
 unew[i][j] =
