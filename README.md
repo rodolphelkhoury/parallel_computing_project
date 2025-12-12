@@ -6,8 +6,6 @@ Watch the simulation in action:
 
 [View full video on SharePoint](https://testusjedu-my.sharepoint.com/:v:/g/personal/rodolph_khoury_net_usj_edu_lb/IQALHFH7zMkuT6lbS4ABE7PkAXb0Y7St7a_HTc6kH2pqmcA?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=vAS8Gd)
 
-<iframe src="https://testusjedu-my.sharepoint.com/personal/rodolph_khoury_net_usj_edu_lb/_layouts/15/embed.aspx?UniqueId=7a5c10f7-5ea9-4da9-b6f7-a2d8b5c8e1f9&embed=%7B%22ust%22:true,%22hv%22:%22CIsDhj8%22%7D&referrer=StreamWebApp&referrerScene=EmbedDialog.Create" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen></iframe>
-
 ## 1. Introduction
 
 In this project, we analyze and solve the 2D transient heat-conduction equation using the explicit finite-difference FTCS method.
