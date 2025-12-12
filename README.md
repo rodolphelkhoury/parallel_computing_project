@@ -65,7 +65,7 @@ In PT8.1 Motivation (Table PT8.1), PDEs are classified as:
 
 The heat-conduction equation is explicitly categorized as a parabolic PDE.
 
-✔ **Why it is parabolic**
+**Why it is parabolic**
 
 A parabolic PDE contains:
 
@@ -75,7 +75,7 @@ A parabolic PDE contains:
 
 The heat equation has exactly this structure.
 
-✔ **Example**
+**Example**
 
 A plate heated along one edge warms gradually over time — a typical parabolic diffusion behavior.
 
@@ -102,7 +102,7 @@ unew[i][j] =
      u[i][j+1] + u[i][j-1] - 4 * u[i][j]);
 ```
 
-✔ **Example**
+**Example**
 
 If a cell is 60°C and neighbors are 68, 55, 62, and 50°C, the update computes the new temperature using surrounding diffusion.
 
@@ -136,11 +136,11 @@ From Chapter 30.2.1 — Convergence and Stability, the 2D condition is:
 Δt ≤ (Δx² * Δy²) / (2 * (Δx² + Δy²))
 ```
 
-✔ **Why it matters**
+**Why it matters**
 
 Large Δt causes unstable, non-physical temperature explosions.
 
-✔ **Example**
+**Example**
 
 Too large Δt → values jump to thousands of degrees.
 
@@ -156,7 +156,7 @@ Our 5-point stencil:
     (i, j-1)
 ```
 
-✔ **Example**
+**Example**
 
 The new temperature depends on the four neighbors around each grid point.
 
@@ -169,7 +169,7 @@ Although the book does not cover MPI, the numerical scheme extends naturally:
 - Each process runs the same FTCS update
 - Boundary conditions are enforced locally
 
-✔ **Example**
+**Example**
 
 If the full domain has 100 rows:
 

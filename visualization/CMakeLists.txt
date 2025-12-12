@@ -13,5 +13,5 @@ target_include_directories(visualization_module
 target_link_libraries(visualization_module
     PUBLIC simulation_module
     PRIVATE ${OPENGL_LIBRARIES}
-    PRIVATE glfw3
+    PRIVATE glfw
 )
