@@ -1,52 +1,12 @@
 # Parallel Heat Simulation
 
-## Prerequisites
+## Video Demonstration
 
-- C++ compiler with C++17 support
-- CMake ≥ 3.16
+Watch the simulation in action:
 
-## Build Instructions
+[View full video on SharePoint](https://testusjedu-my.sharepoint.com/:v:/g/personal/rodolph_khoury_net_usj_edu_lb/IQALHFH7zMkuT6lbS4ABE7PkAXb0Y7St7a_HTc6kH2pqmcA?nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJPbmVEcml2ZUZvckJ1c2luZXNzIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXciLCJyZWZlcnJhbFZpZXciOiJNeUZpbGVzTGlua0NvcHkifX0&e=vAS8Gd)
 
-1. Open a terminal and navigate to the project root:
-```bash
-cd parallel_computing_project
-```
-
-Create and enter the build directory:
-
-```bash
-mkdir -p build
-cd build
-```
-
-Configure the project using CMake:
-
-```bash
-cmake ..
-```
-
-Build the project:
-
-```bash
-cmake --build .
-```
-
-After building, the executable `heat_solver.exe` will be located in the build directory.
-
-## Run Instructions
-
-From the build directory, run the program:
-
-```bash
-export PATH="/c/Program Files/Microsoft MPI/Bin:$PATH"
-mpiexec -n x ./heat_solver.exe   # x is the number of processes
-```
-
-On Linux:
-
-```bash
-mpiexec --oversubscribe -n 4 ./heat_solver
-```
+<iframe src="https://testusjedu-my.sharepoint.com/personal/rodolph_khoury_net_usj_edu_lb/_layouts/15/embed.aspx?UniqueId=7a5c10f7-5ea9-4da9-b6f7-a2d8b5c8e1f9&embed=%7B%22ust%22:true,%22hv%22:%22CIsDhj8%22%7D&referrer=StreamWebApp&referrerScene=EmbedDialog.Create" width="640" height="360" frameborder="0" scrolling="no" allowfullscreen></iframe>
 
 ## 1. Introduction
 
@@ -204,3 +164,51 @@ This project:
 - extends the model to a parallel MPI simulation
 
 The approach follows the recommended methodology from *Numerical Methods for Engineers*.
+
+## Prerequisites
+
+- C++ compiler with C++17 support
+- CMake ≥ 3.16
+
+## Build Instructions
+
+1. Open a terminal and navigate to the project root:
+```bash
+cd parallel_computing_project
+```
+
+Create and enter the build directory:
+
+```bash
+mkdir -p build
+cd build
+```
+
+Configure the project using CMake:
+
+```bash
+cmake ..
+```
+
+Build the project:
+
+```bash
+cmake --build .
+```
+
+After building, the executable `heat_solver.exe` will be located in the build directory.
+
+## Run Instructions
+
+From the build directory, run the program:
+
+```bash
+export PATH="/c/Program Files/Microsoft MPI/Bin:$PATH"
+mpiexec -n x ./heat_solver.exe   # x is the number of processes
+```
+
+On Linux:
+
+```bash
+mpiexec --oversubscribe -n 4 ./heat_solver
+```
