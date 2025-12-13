@@ -101,43 +101,74 @@ The domain is decomposed into horizontal slices, with each process handling a po
 
 ## Build Instructions
 
-1. Open a terminal and navigate to the project root:
+Navigate to project root and build: 
+
 ```bash
 cd parallel_computing_project
-```
-
-Create and enter the build directory:
-
-```bash
-mkdir -p build
-cd build
-```
-
-Configure the project using CMake:
-
-```bash
+mkdir -p build && cd build
 cmake ..
-```
-
-Build the project:
-
-```bash
 cmake --build .
 ```
 
-After building, the executable `heat_solver.exe` will be located in the build directory.
+The executable `heat_solver.exe` will be in the build directory.
 
 ## Run Instructions
 
-From the build directory, run the program:
+### Single Machine
 
+**Windows:**
 ```bash
-export PATH="/c/Program Files/Microsoft MPI/Bin:$PATH"
-mpiexec -n x ./heat_solver.exe   # x is the number of processes
+export PATH="/c/Program Files/Microsoft MPI/Bin: $PATH"
+mpiexec -n 4 ./heat_solver.exe
 ```
 
-On Linux:
-
+**Linux:**
 ```bash
 mpiexec --oversubscribe -n 4 ./heat_solver
 ```
+
+### Multiple Machines
+
+**Prerequisites:**
+```bash
+sudo apt update && sudo apt install -y openmpi-bin openmpi-common libopenmpi-dev build-essential cmake git libglfw3-dev libgl1-mesa-dev
+```
+
+**Setup:**
+
+1. **Get machine info (on each machine):**
+   ```bash
+   hostname -I  # IP address
+   nproc        # CPU cores
+   ```
+
+2. **Configure SSH (on master):**
+   ```bash
+   ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N ""
+   ssh-copy-id -i ~/.ssh/id_ed25519.pub username@worker-ip
+   ssh username@worker-ip hostname  # Verify
+   ```
+
+3. **Clone and build (on ALL machines):**
+   ```bash
+   cd ~
+   git clone https://github.com/rodolphelkhoury/parallel_computing_project.git
+   cd parallel_computing_project
+   mkdir build && cd build
+   cmake ..  && make
+   ```
+
+4. **Create hostfile on master (`~/hosts.txt`):**
+   ```
+   master-hostname slots=4
+   worker-1-hostname slots=4
+   worker-2-hostname slots=4
+   ```
+   Use `nproc` output for slot count.  Use IP addresses if hostnames don't resolve.
+
+5. **Run (from master):**
+   ```bash
+   cd ~/parallel_computing_project/build
+   mpirun --hostfile ~/hosts.txt -np 8 ./heat_solver
+   ```
+   Total processes (`-np`) must not exceed total slots in hostfile. 
